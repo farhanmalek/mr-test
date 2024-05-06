@@ -11,6 +11,7 @@ const Product = () => {
     const [selectedSize, setSelectedSize] = useState<number | null>(null); 
     const [size, setSize ] = useState<string | null>(null);
     const [itemToAdd, setItemToAdd] = useState<CartItem | null>(null);
+    const [error,setError] = useState<string | null>(null);
 
     const url = "https://3sb655pz3a.execute-api.ap-southeast-2.amazonaws.com/live/product";
 
@@ -25,6 +26,7 @@ const Product = () => {
     }
 
     const handleSizeClick = (sizeId: number) => {
+        setError(null)
         setSelectedSize(sizeId);
         const chosenSize = item?.sizeOptions.find(option => option.id === sizeId);
         setSize(chosenSize?.label ?? null);
@@ -56,19 +58,23 @@ const Product = () => {
             }
     
             cartState.count++;
+        } else {
+            setError("Please select a size.")
         }
     };
     
     
 
     return (
-        <div className="flex flex-col p-6 gap-4">
+        <div className="flex flex-col p-6 gap-4 md:flex md:flex-row sm:w-[70%] sm:gap-8">
             {item && (
                 <>
-                    <img src={item.imageURL} alt="product-image"className="self-center w-[100%]" />
+                    <img src={item.imageURL} alt="product-image"className="self-center w-[350px] sm:max-w-[300px]" />
+
+                    <div className="flex flex-col gap-4">
                     <div className="font-semibold text-xl">{item.title}</div>
                     <div className="font-semibold">${item.price}.00</div>
-                    <div className="text-[#888888]">{item.description}</div>
+                    <div className="text-[#888888] text-sm">{item.description}</div>
                     <div><span className="text-[#888888]">Size</span>
                         <span className="text-[#C90000]">*</span>
                         :{' '}
@@ -87,6 +93,12 @@ const Product = () => {
                         ))}
                     </div>
                     <AddToCartButton handleClick = {handleAddToCart}/>
+                    {
+                        error && <p className="text-[#C90000]">{error}</p>
+                    }
+
+                    </div>
+                
                 </>
             )}
         </div>
