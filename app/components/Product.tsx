@@ -1,15 +1,16 @@
 "use client";
 import axios from "axios";
 import { useState, useEffect } from "react";
-import Image from "next/image";
-import type { Product } from "../interfaces/interfaces";
+import { CartItem, type Product } from "../interfaces/interfaces";
 import SizeButton from "./ProductUtils/SizeButton";
 import AddToCartButton from "./ProductUtils/AddToCartButton";
+import cartState from "../context/store";
 
 const Product = () => {
     const [item, setItem] = useState<Product | null>(null);
-    const [selectedSize, setSelectedSize] = useState<number | null>(null); // State to store the ID of the selected size
-    const [size, setSize ] = useState<String | null>(null);
+    const [selectedSize, setSelectedSize] = useState<number | null>(null); 
+    const [size, setSize ] = useState<string | null>(null);
+    const [itemToAdd, setItemToAdd] = useState<CartItem | null>(null);
 
     const url = "https://3sb655pz3a.execute-api.ap-southeast-2.amazonaws.com/live/product";
 
@@ -33,6 +34,33 @@ const Product = () => {
         getProduct();
     },[])
 
+    const handleAddToCart = () => {
+        if (item && size) {
+            const existingItemIndex = cartState.cart.findIndex(
+                cartItem => cartItem.size === size
+            );
+    
+            if (existingItemIndex !== -1) {
+    
+                cartState.cart[existingItemIndex].quantity++;
+            } else {
+                const newItemToAdd: CartItem = {
+                    id: item.id,
+                    title: item.title,
+                    price: item.price,
+                    imageURL: item.imageURL,
+                    size: size,
+                    quantity: 1
+                };
+                cartState.cart.push(newItemToAdd);
+            }
+    
+            cartState.count++;
+        }
+    };
+    
+    
+
     return (
         <div className="flex flex-col p-6 gap-4">
             {item && (
@@ -51,14 +79,14 @@ const Product = () => {
                             <button
                                 
                                 key={option.id}
-                                className={`border ${selectedSize === option.id ? 'border-black border-2 font-semibold' : 'border-[#CCCCCC]'}`}
+                                className={`border ${selectedSize === option.id ? 'border-black border-2 font-semibold' : 'border-[#CCCCCC] text-[#888888]'}`}
                                 onClick={() => handleSizeClick(option.id)}
                             >
                                 <SizeButton size={option.label} />
                             </button>
                         ))}
                     </div>
-                    <AddToCartButton/>
+                    <AddToCartButton handleClick = {handleAddToCart}/>
                 </>
             )}
         </div>
